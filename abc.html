@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Path Finder</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: url('college-bg.jpg') no-repeat center center fixed; background-size: cover; }
+        .container { width: 90%; max-width: 400px; margin: auto; padding: 20px; background: rgba(255, 255, 255, 0.9); box-shadow: 0px 0px 15px gray; border-radius: 10px; margin-top: 50px; }
+        .hidden { display: none; }
+        button { margin: 10px; padding: 12px; width: 100%; background: #0056b3; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #003f7f; }
+        input, select { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        h2 { color: #333; }
+    </style>
+</head>
+<body>
+    <div id="loginPage" class="container">
+        <h2>Login</h2>
+        <input type="tel" id="phone" placeholder="Enter Phone Number" required>
+        <button onclick="sendOTP()">Send OTP</button>
+        <input type="text" id="otp" placeholder="Enter OTP" class="hidden" onkeypress="handleEnter(event, verifyOTP)">
+        <button onclick="verifyOTP()" class="hidden" id="verifyBtn">Verify OTP</button>
+    </div>
+
+    <div id="homePage" class="container hidden">
+        <h2>Welcome</h2>
+        <button onclick="showPage('aptitudePage')">Aptitude Test</button>
+        <button onclick="showPage('collegePage')">Find College</button>
+        <button onclick="showPage('loginPage')">Back</button>
+    </div>
+
+    <div id="aptitudePage" class="container hidden">
+        <h2>Aptitude Test</h2>
+        <div id="questions"></div>
+        <button onclick="submitAptitudeTest()">Submit Test</button>
+        <div id="careerSuggestion" class="hidden"></div>
+        <button onclick="showPage('homePage')">Back</button>
+    </div>
+
+    <div id="collegePage" class="container hidden">
+        <h2>Find College</h2>
+        <label>Area of Interest:</label>
+        <select id="interest">
+            <option>Engineering</option>
+            <option>Medical</option>
+            <option>Paramedical</option>
+            <option>Arts</option>
+            <option>Aviation</option>
+        </select>
+        <label>Preferred Course:</label>
+        <select id="course">
+            <option>Computer Science</option>
+            <option>Mechanical Engineering</option>
+            <option>MBBS</option>
+            <option>BSc Nursing</option>
+            <option>Fine Arts</option>
+            <option>Pilot Training</option>
+        </select>
+        <button onclick="findColleges()">Find Colleges</button>
+        <div id="collegeList"></div>
+        <button onclick="showPage('homePage')">Back</button>
+    </div>
+
+    <script>
+        function sendOTP() {
+            alert("OTP Sent Successfully");
+            document.getElementById("otp").classList.remove("hidden");
+            document.getElementById("verifyBtn").classList.remove("hidden");
+        }
+
+        function verifyOTP() {
+            alert("OTP Verified Successfully");
+            showPage("homePage");
+        }
+
+        function handleEnter(event, callback) {
+            if (event.key === "Enter") {
+                callback();
+            }
+        }
+
+        function showPage(pageId) {
+            let pageElement = document.getElementById(pageId);
+            if (pageElement) {
+                document.querySelectorAll(".container").forEach(page => page.classList.add("hidden"));
+                pageElement.classList.remove("hidden");
+            } else {
+                console.error("Page ID not found: " + pageId);
+            }
+        }
+
+        function findColleges() {
+            let interest = document.getElementById("interest").value;
+            let course = document.getElementById("course").value;
+            let colleges = {
+                "Engineering": ["Cochin University of Science and Technology", "SCMS School of Engineering and Technology", "Rajagiri School of Engineering & Technology"],
+                "Medical": ["Amrita Institute of Medical Sciences", "Government Medical College, Ernakulam", "Sree Narayana Institute of Medical Sciences"],
+                "Paramedical": ["Amrita School of Allied Health Sciences", "Lisie College of Allied Health Sciences", "St. Joseph College of Pharmacy"],
+                "Arts": ["Sacred Heart College", "Maharaja's College", "St. Albert's College"],
+                "Aviation": ["Rajiv Gandhi Aviation Academy", "Indira Gandhi Institute of Aeronautics", "Blue Wings Aviation"]
+            };
+            
+            document.getElementById("collegeList").innerHTML = `<h3>Top Colleges for ${course} in Ernakulam:</h3><ul>` + 
+                (colleges[interest] ? colleges[interest].map(college => `<li>${college}</li>`).join('') : "<li>No colleges found</li>") + `</ul>`;
+        }
+
+        function loadAptitudeQuestions() {
+            let questions = [
+                {q: "Do you enjoy solving complex problems?", field: "Engineering"},
+                {q: "Are you interested in human biology and healthcare?", field: "Medical"},
+                {q: "Do you like working in laboratories and diagnostics?", field: "Paramedical"},
+                {q: "Are you passionate about creative arts and literature?", field: "Arts"},
+                {q: "Do you have a strong interest in aviation and flying?", field: "Aviation"}
+            ];
+            
+            let container = document.getElementById("questions");
+            container.innerHTML = "";
+            questions.forEach((item, index) => {
+                container.innerHTML += `<p>${index + 1}. ${item.q}</p>
+                                       <input type='radio' name='q${index}' value='yes'> Yes
+                                       <input type='radio' name='q${index}' value='no'> No`;
+            });
+        }
+
+        function submitAptitudeTest() {
+            let fields = { "Engineering": 0, "Medical": 0, "Paramedical": 0, "Arts": 0, "Aviation": 0 };
+            let inputs = document.querySelectorAll("input[type='radio']:checked");
+            inputs.forEach(input => {
+                if (input.value === "yes") {
+                    let field = input.name.replace('q', '');
+                    fields[Object.keys(fields)[field]]++;
+                }
+            });
+            let bestField = Object.keys(fields).reduce((a, b) => fields[a] > fields[b] ? a : b);
+            document.getElementById("careerSuggestion").innerHTML = `<h3>Your best career path is: ${bestField}</h3>`;
+            document.getElementById("careerSuggestion").classList.remove("hidden");
+        }
+
+        document.addEventListener("DOMContentLoaded", loadAptitudeQuestions);
+    </script>
+</body>
+</html>

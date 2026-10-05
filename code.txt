@@ -1,0 +1,60 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const twilio = require('twilio');
+const mongoose = require('mongoose');
+const { spawn } = require('child_process');
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+
+// Twilio Setup
+const accountSid = 'YOUR_TWILIO_SID';
+const authToken = 'YOUR_TWILIO_AUTH_TOKEN';
+const twilioClient = twilio(accountSid, authToken);
+const twilioPhone = 'YOUR_TWILIO_PHONE_NUMBER';
+
+// MongoDB Setup
+mongoose.connect('mongodb://localhost:27017/collegeFinder', { useNewUrlParser: true, useUnifiedTopology: true });
+const User = mongoose.model('User', new mongoose.Schema({ phone: String, otp: String }));
+
+// Send OTP API
+app.post('/send-otp', async (req, res) => {
+    const { phone } = req.body;
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    await User.findOneAndUpdate({ phone }, { otp }, { upsert: true });
+    
+    twilioClient.messages.create({
+        body: `Your OTP is ${otp}`,
+        from: twilioPhone,
+        to: phone
+    }).then(() => res.json({ success: true, message: 'OTP Sent' }))
+      .catch(err => res.status(500).json({ success: false, message: err.message }));
+});
+
+// Verify OTP API
+app.post('/verify-otp', async (req, res) => {
+    const { phone, otp } = req.body;
+    const user = await User.findOne({ phone, otp });
+    
+    if (user) res.json({ success: true, message: 'OTP Verified' });
+    else res.json({ success: false, message: 'Invalid OTP' });
+});
+
+// Aptitude Test AI Prediction
+app.post('/predict-career', (req, res) => {
+    const responses = req.body.responses;
+    const pythonProcess = spawn('python3', ['ml_model.py', JSON.stringify(responses)]);
+    
+    pythonProcess.stdout.on('data', (data) => {
+        res.json({ success: true, prediction: data.toString().trim() });
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+        res.status(500).json({ success: false, message: data.toString() });
+    });
+});
+
+app.listen(3000, () => console.log('Server running on port 3000'));

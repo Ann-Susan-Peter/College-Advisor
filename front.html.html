@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Finder</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        .container {
+            display: none;
+            background: #fae2a4;
+            padding: 20px;
+            max-width: 400px;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            padding: 10px 15px;
+            background: #664409;
+            color: rgb(252, 219, 186);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        input, select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: block;
+            font-size: 16px;
+        }
+        .back-btn {
+            background: #dc3545;
+        }
+        .back-btn:hover {
+            background: #a71d2a;
+        }
+        #otp-section {
+            display: none;
+            margin-top: 15px;
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        h2 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN PAGE -->
+    <div id="login-container">
+        <h2>Login with Phone Number</h2>
+        <input type="text" id="phone" placeholder="Enter phone number">
+        <button onclick="sendOTP()">Send OTP</button>
+
+        <div id="otp-section" style="background-color: rgb(189, 165, 94);">
+            <input type="text" id="otp" placeholder="Enter OTP">
+            <button onclick="verifyOTP()">Verify OTP</button>
+        </div>
+    </div>
+
+    <!-- HOME PAGE -->
+    <div id="home-container" class="container">
+        <h2>Welcome!</h2>
+        <button onclick="showFindCollege()">Find College</button>
+        <button onclick="showAptitudeTest()">Take Aptitude Test</button>
+    </div>
+<!-- FIND COLLEGE PAGE -->
+<div id="find-college-container" class="container">
+    <button class="back-btn" onclick="goBack('find-college-container')">Back</button>
+    <h2>Find Your College</h2>
+    
+    <label>Select Area of Interest:</label>
+    <select id="interest" onchange="updateCourses()">
+        <option value="">--Select--</option>
+        <option value="Engineering">Engineering</option>
+        <option value="Medical">Medical</option>
+        <option value="Law">Law</option>
+        <option value="Paramedical">Paramedical</option>
+        <option value="Aviation">Aviation</option>
+        <option value="Arts">Arts</option>
+    </select>
+
+    <label>Select Preferred Course:</label>
+    <select id="course">
+        <option value="">--Select an Area First--</option>
+    </select>
+
+    <button onclick="showColleges()">Find Colleges</button>
+
+    <div id="college-list"></div>
+</div>
+    <!-- APTITUDE TEST -->
+    <div id="aptitude-test-container" class="container">
+        <h2>Aptitude Test</h2>
+        <button class="back-btn" onclick="goBack('aptitude-test-container')">Back</button>
+        <div id="question-container"></div>
+        <button onclick="submitTest()">Submit</button>
+    </div>
+
+    <script>
+        async function sendOTP() {
+            let phone = document.getElementById("phone").value.trim();
+            if (!phone.match(/^\+?\d{10,15}$/)) {
+                alert("Please enter a valid phone number.");
+                return;
+            }
+            if (!phone.startsWith("+")) {
+                phone = "+91" + phone;
+            }
+
+            try {
+                let response = await fetch("http://localhost:3000/send-otp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ phone })
+                });
+
+                let result = await response.json();
+                alert(result.message);
+
+                if (result.success) {
+                    document.getElementById("otp-section").style.display = "block";
+                }
+            } catch (error) {
+                console.error("Error sending OTP:", error);
+                alert("Failed to send OTP. Please try again.");
+            }
+        }
+
+        async function verifyOTP() {
+            let phone = document.getElementById("phone").value.trim();
+            let otp = document.getElementById("otp").value.trim();
+
+            if (!otp || !phone) {
+                alert("Please enter both phone number and OTP.");
+                return;
+            }
+
+            try {
+                let response = await fetch("http://localhost:3000/verify-otp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ phone, otp })
+                });
+
+                let result = await response.json();
+                alert(result.message);
+
+                if (result.success) {
+                    document.getElementById("login-container").style.display = "none";
+                    document.getElementById("home-container").style.display = "block";
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Something went wrong. Please try again.");
+            }
+        }
+        function goBack(section) {
+            document.getElementById(section).style.display = "none";
+            document.getElementById("home-container").style.display = "block";
+        }
+
+        function updateCourses() {
+            let interest = document.getElementById("interest").value;
+            let courseSelect = document.getElementById("course");
+            courseSelect.innerHTML = "<option value=''>--Select--</option>";
+
+            let courses = {
+                "Engineering": ["Computer Science", "Mechanical", "Civil", "Electronics"],
+                "Medical": ["MBBS", "BDS", "BAMS", "BHMS"],
+                "Law": ["LLB", "BA LLB"],
+                "Paramedical": ["Nursing", "Pharmacy", "Physiotherapy"],
+                "Aviation": ["Pilot Training", "Aeronautical Engineering"],
+                "Arts": ["BA History", "BA English", "Fine Arts"]
+            };
+
+            if (interest in courses) {
+                courses[interest].forEach(course => {
+                    let option = document.createElement("option");
+                    option.value = course;
+                    option.textContent = course;
+                    courseSelect.appendChild(option);
+                });
+            }
+        }
+
+        function showColleges() {
+            let interest = document.getElementById("interest").value;
+            let course = document.getElementById("course").value;
+            let collegeList = document.getElementById("college-list");
+
+            if (!interest || !course) {
+                alert("Please select an area of interest and a preferred course.");
+                return;
+            }
+
+            let colleges = {
+                "Computer Science": ["Cochin University", "Model Engineering College"],
+                "Mechanical": ["FISAT", "Rajagiri Engineering College"],
+                "MBBS": ["Amrita Institute of Medical Sciences", "Government Medical College, Ernakulam"],
+                "LLB": ["Mahatma Gandhi University", "National University of Advanced Legal Studies"],
+                "Pilot Training": ["Indira Gandhi Institute of Aviation", "Rajiv Gandhi Aviation Academy"],
+                "Fine Arts": ["Raja Ravi Varma College of Fine Arts","ilahia arts &science"]
+            };
+
+            collegeList.innerHTML = `<h3>Colleges for ${course}:</h3>`;
+            if (colleges[course]) {
+                colleges[course].forEach(college => {
+                    collegeList.innerHTML += `<p>${college}</p>`;
+                });
+            } else {
+                collegeList.innerHTML += `<p>No colleges found.</p>`;
+            }
+        }
+
+        function showFindCollege() {
+            document.getElementById("home-container").style.display = "none";
+            document.getElementById("find-college-container").style.display = "block";
+        }
+
+        function showAptitudeTest() {
+            document.getElementById("home-container").style.display = "none";
+            document.getElementById("aptitude-test-container").style.display = "block";
+            loadAptitudeQuestions();
+        } 
+        
+        function loadAptitudeQuestions() {
+            let questions = [
+                "Do you enjoy problem-solving?", "Are you interested in healthcare?",
+                "Do you like working with machines?", "Are you good at debating?",
+                "Do you enjoy writing?", "Do you like designing things?", "Do you enjoy working with people?",
+                "Are you interested in flying?", "Are you comfortable with science?", "Do you enjoy mathematics?",
+                "Do you like exploring new ideas?", "Are you good at logical reasoning?",
+                "Do you enjoy helping others?", "Do you like research?",
+                "Are you interested in legal matters?", "Do you enjoy creating things?",
+                "Do you like hands-on work?", "Do you prefer structured environments?", "Do you prefer theoretical subjects?", "Do you like technology?"
+            ];
+
+            let container = document.getElementById("question-container");
+            container.innerHTML = "";
+            questions.forEach((q, i) => {
+                container.innerHTML += `<p>${q} <input type="radio" name="q${i}" value="yes"> Yes <input type="radio" name="q${i}" value="no"> No</p>`;
+            });
+        }
+
+        async function submitTest() {
+            let answers = [];
+            for (let i = 0; i < 20; i++) {
+                let selected = document.querySelector(`input[name="q${i}"]:checked`);
+                answers.push(selected ? selected.value : "no");
+            }
+
+            let response = await fetch("http://localhost:3000/predict-career", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ answers })
+            });
+
+            let result = await response.json();
+            alert(`Recommended Career Path: ${result.recommendation}`);
+            showFindCollege();
+        }
+    </script>
+
+</body>
+</html>

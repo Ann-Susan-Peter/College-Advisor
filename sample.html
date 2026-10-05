@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Advisor</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .hidden { display: none; }
+        .container { max-width: 600px; margin: auto; text-align: center; }
+    </style>
+    <script>
+        function sendOTP() {
+            let phone = document.getElementById("phone").value;
+            if (/^\d{10}$/.test(phone)) {
+                let otp = Math.floor(1000 + Math.random() * 9000);
+                localStorage.setItem("otp", otp);
+                alert("Your OTP is: " + otp);
+            } else {
+                alert("Enter a valid 10-digit mobile number");
+            }
+        }
+
+        function verifyOTP() {
+            let enteredOTP = document.getElementById("otp").value;
+            let storedOTP = localStorage.getItem("otp");
+            if (enteredOTP === storedOTP) {
+                document.getElementById("loginSection").classList.add("hidden");
+                document.getElementById("homePage").classList.remove("hidden");
+            } else {
+                alert("Invalid OTP. Try again.");
+            }
+        }
+
+        function showSection(id) {
+            document.getElementById("aptitudeTest").classList.add("hidden");
+            document.getElementById("findCollege").classList.add("hidden");
+            document.getElementById(id).classList.remove("hidden");
+        }
+
+        function showOtherInput(selectId, inputId) {
+            let select = document.getElementById(selectId);
+            let input = document.getElementById(inputId);
+            input.style.display = select.value === "Other" ? "block" : "none";
+        }
+
+        function findColleges() {
+            let location = document.getElementById("location").value;
+            if (location === "Other") {
+                location = document.getElementById("otherLocation").value;
+            }
+
+            let collegesByLocation = {
+                "USA": ["Harvard University", "MIT", "Stanford University"],
+                "Canada": ["University of Toronto", "McGill University", "University of British Columbia"],
+                "UK": ["Oxford University", "Cambridge University", "Imperial College London"],
+                "India": ["IIT Bombay", "IIM Bangalore", "Delhi University"],
+                "Singapore": ["National University of Singapore", "Nanyang Technological University"],
+                "Australia": ["University of Sydney", "University of Melbourne"],
+                "Germany": ["Technical University of Munich", "Heidelberg University"],
+                "France": ["Sorbonne University", "École Polytechnique"],
+                "Japan": ["University of Tokyo", "Kyoto University"],
+                "China": ["Tsinghua University", "Peking University"],
+            };
+
+            let colleges = collegesByLocation[location] || ["No colleges found for this location"];
+
+            document.getElementById("collegeResults").innerHTML = "<h3>Suggested Colleges:</h3>" + colleges.join("<br>");
+        }
+    </script>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Login Section -->
+    <div id="loginSection">
+        <h2>Login</h2>
+        <input type="text" id="phone" placeholder="Enter Mobile Number">
+        <button onclick="sendOTP()">Send OTP</button>
+        <br><br>
+        <input type="text" id="otp" placeholder="Enter OTP">
+        <button onclick="verifyOTP()">Verify OTP</button>
+    </div>
+
+    <!-- Home Page -->
+    <div id="homePage" class="hidden">
+        <h2>Welcome!</h2>
+        <button onclick="showSection('aptitudeTest')">Aptitude Test</button>
+        <button onclick="showSection('findCollege')">Find Colleges</button>
+    </div>
+
+    <!-- Aptitude Test -->
+    <div id="aptitudeTest" class="hidden">
+        <h3>Aptitude Test</h3>
+        <p>More questions here...</p>
+    </div>
+
+    <!-- Find Colleges -->
+    <div id="findCollege" class="hidden">
+        <h3>Find Colleges</h3>
+
+        <label>Location:</label>
+        <select id="location" onchange="showOtherInput('location', 'otherLocation')">
+            <option>USA</option>
+            <option>Canada</option>
+            <option>UK</option>
+            <option>India</option>
+            <option>Singapore</option>
+            <option>Australia</option>
+            <option>Germany</option>
+            <option>France</option>
+            <option>Japan</option>
+            <option>China</option>
+            <option>Other</option>
+        </select>
+        <input type="text" id="otherLocation" placeholder="Enter other location" class="hidden">
+        <br><br>
+
+        <label>Course:</label>
+        <select id="course" onchange="showOtherInput('course', 'otherCourse')">
+            <option>Engineering</option>
+            <option>Medical</option>
+            <option>Law</option>
+            <option>Business</option>
+            <option>Arts</option>
+            <option>Science</option>
+            <option>Computer Science</option>
+            <option>AI & ML</option>
+            <option>Design</option>
+            <option>Finance</option>
+            <option>Other</option>
+        </select>
+        <input type="text" id="otherCourse" placeholder="Enter other course" class="hidden">
+        <br><br>
+
+        <label>Interest:</label>
+        <select id="interest" onchange="showOtherInput('interest', 'otherInterest')">
+            <option>Technology</option>
+            <option>Healthcare</option>
+            <option>Business</option>
+            <option>Arts</option>
+            <option>Finance</option>
+            <option>Science</option>
+            <option>Social Work</option>
+            <option>Sports</option>
+            <option>Education</option>
+            <option>Entrepreneurship</option>
+            <option>Other</option>
+        </select>
+        <input type="text" id="otherInterest" placeholder="Enter other interest" class="hidden">
+        <br><br>
+
+        <button onclick="findColleges()">Find Colleges</button>
+        <div id="collegeResults"></div>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,4 @@
+ { name: "Toc H Institute of Science And Technology", courses: ["CSE", "IT", "ECE", "ME", "CE","EEE",] },
+                { name: "Muthoot Institute of Technology & Science ", courses: ["CSE", "AI", "ECE", "ME", "CE","AI&DS","CC","EEE"] },
+                { name: "Christ Knowledge City", courses: ["CSE", "IT", "ECE", "ME", "CE"] }
+                }

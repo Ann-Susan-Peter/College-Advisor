@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kerala College Advisor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        select, input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        .results {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="loginContainer" style="display:block;">
+        <h2>Login</h2>
+        <input type="text" id="phone" placeholder="Enter Phone Number">
+        <button onclick="sendOTP()">Send OTP</button>
+        <div id="otpSection" style="display:none;">
+            <input type="text" id="otp" placeholder="Enter OTP">
+            <button onclick="verifyOTP()">Verify OTP</button>
+        </div>
+    </div>
+
+    <div class="container" id="homeContainer">
+        <h2>Welcome to Kerala College Advisor</h2>
+        <button onclick="showAptitudeTest()">Aptitude Test</button>
+        <button onclick="showCollegeForm()">Find College</button>
+    </div>
+
+    <div class="container" id="aptitudeTestContainer">
+        <h2>Aptitude Test</h2>
+        <form id="aptitudeForm" onsubmit="evaluateAptitude(event)">
+            <p>1. Do you enjoy solving mathematical problems?</p>
+            <select id="q1">
+                <option value="Engineering">Yes</option>
+                <option value="Arts">No</option>
+            </select>
+            <p>2. Are you interested in human anatomy and healthcare?</p>
+            <select id="q2">
+                <option value="Medical">Yes</option>
+                <option value="Engineering">No</option>
+            </select>
+            <p>3. Do you like designing or building structures?</p>
+            <select id="q3">
+                <option value="Engineering">Yes</option>
+                <option value="Arts">No</option>
+            </select>
+            <p>4. Do you have a passion for painting, music, or drama?</p>
+            <select id="q4">
+                <option value="Arts">Yes</option>
+                <option value="Engineering">No</option>
+            </select>
+            <button type="submit">Get Career Recommendation</button>
+        </form>
+        <div class="results" id="careerRecommendation"></div>
+    </div>
+
+    <div class="container" id="collegeFormContainer">
+        <h2>Find Colleges in Ernakulam, Kerala</h2>
+        <form id="collegeForm" onsubmit="getRecommendations(event)">
+            <label>Area of Interest:</label>
+            <select id="interest">
+                <option value="Engineering">Engineering</option>
+                <option value="Medical">Medical</option>
+                <option value="Paramedical">Paramedical</option>
+                <option value="Arts">Arts</option>
+            </select>
+            <label>Preferred Course:</label>
+            <select id="course">
+                <option value="CSE">Computer Science Engineering</option>
+                <option value="ME">Mechanical Engineering</option>
+                <option value="CE">Civil Engineering</option>
+                <option value="ECE">Electronics & Communication</option>
+                <option value="MBBS">MBBS</option>
+                <option value="BDS">BDS (Dental)</option>
+                <option value="BSc Nursing">BSc Nursing</option>
+                <option value="BPharm">BPharm</option>
+                <option value="Fine Arts">Fine Arts</option>
+            </select>
+            <button type="submit">Get Recommendations</button>
+        </form>
+        <div class="results" id="recommendations"></div>
+    </div>
+
+    <script>
+        function sendOTP() {
+            let phone = document.getElementById("phone").value;
+            if (phone.length === 10) {
+                alert("OTP sent to " + phone);
+                document.getElementById("otpSection").style.display = "block";
+            } else {
+                alert("Enter a valid phone number");
+            }
+        }
+
+        function verifyOTP() {
+            let otp = document.getElementById("otp").value;
+            if (otp === "1234") {
+                document.getElementById("loginContainer").style.display = "none";
+                document.getElementById("homeContainer").style.display = "block";
+            } else {
+                alert("Invalid OTP. Try again.");
+            }
+        }
+
+        function showAptitudeTest() {
+            document.getElementById("homeContainer").style.display = "none";
+            document.getElementById("aptitudeTestContainer").style.display = "block";
+        }
+
+        function evaluateAptitude(event) {
+            event.preventDefault();
+            let scores = { Engineering: 0, Medical: 0, Arts: 0 };
+            for (let i = 1; i <= 4; i++) {
+                scores[document.getElementById("q" + i).value]++;
+            }
+            let bestCareer = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+            document.getElementById("careerRecommendation").innerHTML = "Recommended Career: " + bestCareer;
+        }
+
+        function showCollegeForm() {
+            document.getElementById("homeContainer").style.display = "none";
+            document.getElementById("collegeFormContainer").style.display = "block";
+        }
+
+        function getRecommendations(event) {
+            event.preventDefault();
+            const interest = document.getElementById("interest").value;
+            const course = document.getElementById("course").value;
+            const recommendationsDiv = document.getElementById("recommendations");
+            let recommendations = `<h3>Recommended Colleges:</h3>`;
+            recommendations += `<p>Colleges offering ${course} in ${interest} field</p>`;
+            recommendationsDiv.innerHTML = recommendations;
+        }
+    </script>
+</body>
+</html>
